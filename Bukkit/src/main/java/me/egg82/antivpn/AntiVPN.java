@@ -152,7 +152,7 @@ public class AntiVPN {
         BukkitLocaleCommandUtil.setConsoleLocale(plugin, cachedConfig.getLanguage());
 
         BukkitIPManager ipManager = new BukkitIPManager(plugin, sourceManager, cachedConfig.getCacheTime());
-        BukkitPlayerManager playerManager = new BukkitPlayerManager(plugin, cachedConfig.getMcLeaksKey(), cachedConfig.getCacheTime());
+        BukkitPlayerManager playerManager = new BukkitPlayerManager(plugin, cachedConfig.isMcLeaksEnabled(),  cachedConfig.getMcLeaksKey(), cachedConfig.getCacheTime());
         Platform platform = new BukkitPlatform(System.currentTimeMillis());
         PluginMetadata metadata = new BukkitPluginMetadata(plugin.getDescription().getVersion());
         VPNAPI api = new GenericVPNAPI(platform, metadata, ipManager, playerManager, sourceManager, cachedConfig, new MBassador<>(new GenericPublicationErrorHandler(BukkitLocaleCommandUtil.getConsole().getLocalizationManager())));

@@ -33,20 +33,29 @@ public abstract class AbstractPlayerManager implements PlayerManager {
 
     protected final LoadingCache<UUID, PlayerModel> playerCache;
     private final String mcleaksKey;
+    private final boolean useMcleaks;
 
-    protected AbstractPlayerManager(@NotNull TimeUtil.Time cacheTime, @Nullable String mcleaksKey) {
-        playerCache = Caffeine.newBuilder().expireAfterAccess(cacheTime.getTime(), cacheTime.getUnit()).expireAfterWrite(cacheTime.getTime(), cacheTime.getUnit()).build(k -> calculatePlayerResult(k, true));
+    protected AbstractPlayerManager(@NotNull TimeUtil.Time cacheTime,
+                                    @NotNull boolean useMcleaks, @Nullable String mcleaksKey) {
+        playerCache =
+            Caffeine.newBuilder().expireAfterAccess(cacheTime.getTime(), cacheTime.getUnit())
+                .expireAfterWrite(cacheTime.getTime(), cacheTime.getUnit())
+                .build(k -> calculatePlayerResult(k, true));
+        this.useMcleaks = useMcleaks;
         this.mcleaksKey = mcleaksKey;
     }
 
-    public LoadingCache<UUID, PlayerModel> getPlayerCache() { return playerCache; }
+    public LoadingCache<UUID, PlayerModel> getPlayerCache() {
+        return playerCache;
+    }
 
     public @NotNull CompletableFuture<Void> savePlayer(@NotNull Player player) {
         return CompletableFuture.runAsync(() -> {
             CachedConfig cachedConfig = ConfigUtil.getCachedConfig();
 
             for (StorageService service : cachedConfig.getStorage()) {
-                PlayerModel model = service.getOrCreatePlayerModel(player.getUuid(), player.isMcLeaks());
+                PlayerModel model =
+                    service.getOrCreatePlayerModel(player.getUuid(), player.isMcLeaks());
                 service.storeModel(model);
             }
 
@@ -92,7 +101,9 @@ public abstract class AbstractPlayerManager implements PlayerManager {
         });
     }
 
-    public @NotNull CompletableFuture<@NotNull Boolean> checkMcLeaks(@NotNull UUID uniqueId, boolean useCache) throws APIException {
+    public @NotNull CompletableFuture<@NotNull Boolean> checkMcLeaks(@NotNull UUID uniqueId,
+                                                                     boolean useCache)
+        throws APIException {
         return CompletableFuture.supplyAsync(() -> {
             PlayerModel model;
             if (useCache) {
@@ -102,7 +113,8 @@ public abstract class AbstractPlayerManager implements PlayerManager {
                     if (ex.getCause() instanceof APIException) {
                         throw (APIException) ex.getCause();
                     } else {
-                        throw new APIException(false, "Could not get data for player " + uniqueId, ex);
+                        throw new APIException(false, "Could not get data for player " + uniqueId,
+                            ex);
                     }
                 } catch (RuntimeException | Error ex) {
                     throw new APIException(false, "Could not get data for player " + uniqueId, ex);
@@ -117,7 +129,8 @@ public abstract class AbstractPlayerManager implements PlayerManager {
         });
     }
 
-    private @NotNull PlayerModel calculatePlayerResult(@NotNull UUID uuid, boolean useCache) throws APIException {
+    private @NotNull PlayerModel calculatePlayerResult(@NotNull UUID uuid, boolean useCache)
+        throws APIException {
         CachedConfig cachedConfig = ConfigUtil.getCachedConfig();
 
         if (useCache) {
@@ -139,23 +152,28 @@ public abstract class AbstractPlayerManager implements PlayerManager {
         PlayerModel retVal = new PlayerModel();
         retVal.setUuid(uuid);
 
-        try {
-            HttpURLConnection conn = WebRequest.builder(new URL("https://mcleaks.themrgong.xyz/api/v3/isuuidmcleaks/" + uuid))
-                .timeout(new TimeUtil.Time(2500L, TimeUnit.MILLISECONDS))
-                .userAgent("egg82/Anti-VPN")
-                .header("API-Key", mcleaksKey)
-                .build()
-                .getConnection();
+        if (useMcleaks) {
+            try {
+                HttpURLConnection conn = WebRequest
+                    .builder(new URL("https://mcleaks.themrgong.xyz/api/v3/isuuidmcleaks/" + uuid))
+                    .timeout(new TimeUtil.Time(2500L, TimeUnit.MILLISECONDS))
+                    .userAgent("egg82/Anti-VPN")
+                    .header("API-Key", mcleaksKey)
+                    .build()
+                    .getConnection();
 
-            JSONDeserializer<MCLeaksResultModel> modelDeserializer = new JSONDeserializer<>();
-            MCLeaksResultModel model = modelDeserializer.deserialize(WebRequest.getString(conn));
+                JSONDeserializer<MCLeaksResultModel> modelDeserializer = new JSONDeserializer<>();
+                MCLeaksResultModel model =
+                    modelDeserializer.deserialize(WebRequest.getString(conn));
 
-            if (model.getError() != null) {
-                throw new APIException(model.getError().contains("rate limit"), model.getError());
+                if (model.getError() != null) {
+                    throw new APIException(model.getError().contains("rate limit"),
+                        model.getError());
+                }
+                retVal.setMcleaks(model.isMcLeaks());
+            } catch (IOException ex) {
+                throw new APIException(false, ex);
             }
-            retVal.setMcleaks(model.isMcLeaks());
-        } catch (IOException ex) {
-            throw new APIException(false, ex);
         }
 
         if (useCache) {

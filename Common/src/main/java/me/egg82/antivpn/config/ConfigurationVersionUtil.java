@@ -71,6 +71,9 @@ public class ConfigurationVersionUtil {
         if (config.node("version").getDouble() == 5.1d) {
             to52(config);
         }
+        if (config.node("version").getDouble() == 5.2d) {
+            to53(config);
+        }
 
         if (config.node("version").getDouble() != oldVersion) {
             File backupFile = new File(fileOnDisk.getParent(), fileOnDisk.getName() + ".bak");
@@ -689,5 +692,13 @@ public class ConfigurationVersionUtil {
 
         // Version
         config.node("version").set(5.2d);
+    }
+
+    private static void to53(@NotNull CommentedConfigurationNode config) throws SerializationException {
+        // Add mcleaks->enabled
+        config.node("mcleaks", "enabled").set(true);
+
+        // Version
+        config.node("version").set(5.3d);
     }
 }

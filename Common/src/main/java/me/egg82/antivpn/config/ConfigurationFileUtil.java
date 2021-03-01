@@ -102,6 +102,7 @@ public class ConfigurationFileUtil {
             .timeout(config.node("connection", "timeout").getLong(5000L))
             .vpnKickMessage(config.node("action", "vpn", "kick-message").getString("<red>Please disconnect from your proxy or VPN before re-joining!</red>"))
             .vpnActionCommands(getVpnActionCommands(config, debug, console))
+            .mcleaksEnabled(config.node("mcleaks", "enabled").getBoolean(true))
             .mcleaksKickMessage(config.node("action", "mcleaks", "kick-message").getString("<red>Please discontinue your use of an MCLeaks account!</red>"))
             .mcleaksActionCommands(getMcLeaksActionCommands(config, debug, console))
             .vpnAlgorithmMethod(vpnAlgorithmMethod)

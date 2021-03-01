@@ -65,6 +65,9 @@ public class CachedConfig {
     private double vpnAlgorithmConsensus = 0.6d;
     public double getVPNAlgorithmConsensus() { return vpnAlgorithmConsensus; }
 
+    private boolean mcleaksEnabled = true;
+    public boolean isMcLeaksEnabled() { return mcleaksEnabled; }
+
     private String mcleaksKey = "";
     public @NotNull String getMcLeaksKey() { return mcleaksKey; }
 
@@ -164,6 +167,11 @@ public class CachedConfig {
 
         public @NotNull CachedConfig.Builder vpnActionCommands(@NotNull Collection<@NotNull String> value) {
             values.vpnActionCommands = ImmutableList.copyOf(value);
+            return this;
+        }
+
+        public @NotNull CachedConfig.Builder mcleaksEnabled(@NotNull boolean value) {
+            values.mcleaksEnabled = value;
             return this;
         }
 

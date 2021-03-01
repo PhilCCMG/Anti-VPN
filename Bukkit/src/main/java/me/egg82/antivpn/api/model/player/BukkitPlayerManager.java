@@ -20,8 +20,10 @@ import org.jetbrains.annotations.Nullable;
 public class BukkitPlayerManager extends AbstractPlayerManager {
     private final Plugin plugin;
 
-    public BukkitPlayerManager(@NotNull Plugin plugin, @Nullable String mcleaksKey, @NotNull TimeUtil.Time cacheTime) {
-        super(cacheTime, mcleaksKey);
+    public BukkitPlayerManager(@NotNull Plugin plugin,
+                               @NotNull boolean useMcleaks, @Nullable String mcleaksKey,
+                               @NotNull TimeUtil.Time cacheTime) {
+        super(cacheTime, useMcleaks, mcleaksKey);
 
         this.plugin = plugin;
     }
