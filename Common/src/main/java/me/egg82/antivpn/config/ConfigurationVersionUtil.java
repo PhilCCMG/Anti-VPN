@@ -698,6 +698,12 @@ public class ConfigurationVersionUtil {
         // Add mcleaks->enabled
         config.node("mcleaks", "enabled").set(true);
 
+        // Add explanation on how to get MCLeaks API Key to mcleaks
+        config.node("mcleaks", "key").commentIfAbsent("If you are hitting the API Rate Limits for "
+                                               + "MCLeaks, you can request an API key by emailing"
+                                               + "contact@mail.themrgong.xyz, with the subject "
+                                               + "line 'MCLeaks - Rate limit increase request'.");
+
         // Version
         config.node("version").set(5.3d);
     }
